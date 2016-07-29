@@ -1,4 +1,4 @@
-import Engine, { signal } from '../src/engine';
+import Engine, { signal } from '../src';
 
 let engine = new Engine({
   position: {
