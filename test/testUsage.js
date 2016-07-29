@@ -17,17 +17,15 @@ let engine = new Engine({
   }
 }, {
   position: {
-    hooks: {
-      'external.update': (delta) => {
-        engine.systems.family.get('position').forEach(entity => {
-          engine.actions.position.add(entity, delta, 0);
-          // with sugar: entity.position.add(delta, 0);
-        });
-      },
-      // One can use hooks to redirect signals
-      'entity.add.position:post': (entity, data) => {
-        engine.actions.position.set(entity, data.x, data.y);
-      }
+    'external.update': (delta) => {
+      engine.systems.family.get('position').forEach(entity => {
+        engine.actions.position.add(entity, delta, 0);
+        // with sugar: entity.position.add(delta, 0);
+      });
+    },
+    // One can use hooks to redirect signals
+    'entity.add.position:post': (entity, data) => {
+      engine.actions.position.set(entity, data.x, data.y);
     }
   }
 });

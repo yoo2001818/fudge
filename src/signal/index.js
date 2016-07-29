@@ -23,9 +23,8 @@ export default class Signal {
     this._listeners.sort((a, b) => a.priority - b.priority);
     this._dirty = false;
   }
-  dispatch() {
+  dispatch(...args) {
     this._sort();
-    let args = arguments;
     let currentArgs = args;
     for (let i = 0; i < this._listeners.length; ++i) {
       let listener = this._listeners[i];
