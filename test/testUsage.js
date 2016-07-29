@@ -1,4 +1,5 @@
-import Engine, { signal } from '../src';
+import Engine from '../src/engine';
+import signal from '../src/util/signal';
 
 let engine = new Engine({
   position: {
@@ -31,7 +32,7 @@ let engine = new Engine({
 });
 
 // Components and systems can be defined like this in 'maintenance mode'
-engine.c('velocity', {x: 0, y: 0}, {
+engine.addComponent('velocity', {x: 0, y: 0}, {
   set: signal((entity, x, y) => {
     entity.velocity.x = x;
     entity.velocity.y = y;
@@ -42,7 +43,7 @@ engine.c('velocity', {x: 0, y: 0}, {
       entity.velocity.y + y);
   }
 });
-engine.s('init', {
+engine.addSystem('init', {
   'external.start': () => {
     let entity = engine.actions.entity.create({
       position: {}
@@ -55,12 +56,14 @@ engine.s('init', {
   }
 });
 
+console.log(engine);
+
 // Load config data
-engine.loadConfig({
+/* engine.loadConfig({
   position: {
     xMove: 1
   }
-});
+}); */
 /*
 engine.loadState({
   entities: [{
@@ -79,7 +82,7 @@ engine.signals.position.set.on((entity, x, y) => {
   console.log(entity, x, y);
 });
 
-engine.actions.external.update(13);
+// engine.actions.external.update(13);
 console.log(engine.getState());
 
 engine.stop();
