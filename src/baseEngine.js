@@ -7,16 +7,15 @@ export default class BaseEngine {
     this.actions = {};
     this.signals = {};
     this.systems = {};
-    // TODO
     this.state = null;
 
     this.addComponents(components);
     if (builtIn) {
       this.addComponent('external', {
         actions: {
-          update: signal(() => {}),
-          start: signal(() => {}),
-          stop: signal(() => {})
+          update: signal(() => {}, func => delta => func('update', delta)),
+          start: signal(() => {}, func => () => func('start')),
+          stop: signal(() => {}, func => () => func('stop'))
         }
       });
     }
@@ -133,17 +132,21 @@ export default class BaseEngine {
   }
   loadState(state) {
     if (this.running) throw new Error('Cannot modify engine while running');
-    // TODO Should construct ECS state.
     this.state = state;
   }
   getState() {
-    // TODO Should call toJSON if ECS has built.
+    if (this.state && this.state.toJSON) return this.state.toJSON();
     return this.state;
   }
   start() {
-
+    this.actions.external.start();
+    this.running = true;
   }
   stop() {
-
+    this.actions.external.stop();
+    this.running = false;
+  }
+  update(delta) {
+    this.actions.external.update(delta);
   }
 }

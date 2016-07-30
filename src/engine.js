@@ -1,22 +1,14 @@
 import BaseEngine from './baseEngine';
 import ComponentStore from './componentStore';
+import ECSState from './ecsState';
 import signal from './util/signal';
 
 export default class Engine extends BaseEngine {
   constructor(components, systems) {
     super();
     this.components = new ComponentStore();
-    this.state = {
-      entities: new Map(),
-      global: {
-        entityId: 0
-      }
-    };
-    // TODO Add entity base
-    // actions.entity.create
-    // actions.entity.delete
-    // actions.entity.add.velocity
-    // actions.entity.remove.velocity
+    this.state = new ECSState();
+    // Create entity base
     this.addComponent('entity', {
       actions: {
         create: signal(data => {
@@ -33,7 +25,7 @@ export default class Engine extends BaseEngine {
             let removeHandler = this.actions.entity.remove[name];
             if (removeHandler) removeHandler(entity);
           }
-          this.state.entities.delete(entity);
+          this.state.entities.delete(entity.id);
         })
       }
     });
@@ -67,5 +59,9 @@ export default class Engine extends BaseEngine {
         }
       }, this.actions.entity, this.signals.entity, this.signals);
     }
+  }
+  loadState(state) {
+    if (this.running) throw new Error('Cannot modify engine while running');
+    this.state = ECSState.fromJSON(state);
   }
 }

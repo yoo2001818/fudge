@@ -97,7 +97,6 @@ engine.loadState({
 */
 // Attach the system objects and start the engine.
 engine.start();
-engine.actions.external.start();
 
 engine.signals.position.set.on((entity, x, y) => {
   console.log(entity, x, y);
