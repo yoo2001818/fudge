@@ -18,15 +18,17 @@ let engine = new Engine({
   }
 }, {
   position: {
-    'external.update': (delta) => {
-      engine.systems.family.get('position').forEach(entity => {
-        engine.actions.position.add(entity, delta, 0);
-        // with sugar: entity.position.add(delta, 0);
-      });
-    },
-    // One can use hooks to redirect signals
-    'entity.add.position:post': (entity, data) => {
-      engine.actions.position.set(entity, data.x, data.y);
+    hooks: {
+      'external.update': (delta) => {
+        engine.systems.family.get('position').forEach(entity => {
+          engine.actions.position.add(entity, delta, 0);
+          // with sugar: entity.position.add(delta, 0);
+        });
+      },
+      // One can use hooks to redirect signals
+      'entity.add.position:post@150': (entity, data) => {
+        engine.actions.position.set(entity, data.x, data.y);
+      }
     }
   }
 });
@@ -44,15 +46,19 @@ engine.addComponent('velocity', {x: 0, y: 0}, {
   }
 });
 engine.addSystem('init', {
-  'external.start': () => {
-    let entity = engine.actions.entity.create({
-      position: {}
-    });
-    engine.actions.entity.add.velocity(entity, {
-      x: 2, y: 3
-    });
-    // Or...
-    // entity.add('velocity', {x: 2, y: 3});
+  hooks: {
+    'external.start': () => {
+      console.log('start');
+      let entity = engine.actions.entity.create({
+        position: {}
+      });
+      console.log(entity);
+      engine.actions.entity.add.velocity(entity, {
+        x: 2, y: 3
+      });
+      // Or...
+      // entity.add('velocity', {x: 2, y: 3});
+    }
   }
 });
 
@@ -77,6 +83,7 @@ engine.loadState({
 */
 // Attach the system objects and start the engine.
 engine.start();
+engine.actions.external.start();
 
 engine.signals.position.set.on((entity, x, y) => {
   console.log(entity, x, y);
