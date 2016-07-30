@@ -55,7 +55,7 @@ export default class Engine extends BaseEngine {
             } else {
               entity[name] = Object.assign({}, instance, data);
             }
-          })
+          }, handler => (entity, data) => handler(entity, name, data))
         },
         remove: {
           [name]: signal(entity => {
@@ -63,9 +63,9 @@ export default class Engine extends BaseEngine {
               throw new Error('Component ' + name + ' is not added');
             }
             delete entity[name];
-          })
+          }, handler => (entity) => handler(entity, name))
         }
-      }, this.actions.entity, this.signals.entity);
+      }, this.actions.entity, this.signals.entity, this.signals);
     }
   }
 }

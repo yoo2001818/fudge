@@ -1,16 +1,16 @@
-import Signal from './index';
+import ParentSignal from './parentSignal';
 
 /**
  * A signal class with multiple phases.
  * @extends Signal
  */
-export default class ActionSignal extends Signal {
-  constructor(handler) {
-    super(false);
+export default class ActionSignal extends ParentSignal {
+  constructor(handler, parent) {
+    super(false, parent && parent.dispatch);
     // Phase: pre -> emit -> handler -> post
     this._handler = handler;
-    this.pre = new Signal(true);
-    this.post = new Signal();
+    this.pre = new ParentSignal(true, parent && parent.pre);
+    this.post = new ParentSignal(false, parent && parent.post);
   }
   dispatch() {
     // Pre phase

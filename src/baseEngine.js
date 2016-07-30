@@ -1,4 +1,5 @@
 import signal from './util/signal';
+import ParentSignal from './signal/parentSignal';
 
 export default class BaseEngine {
   constructor(components, systems, builtIn = true) {
@@ -43,12 +44,28 @@ export default class BaseEngine {
       if (this.signals[name] == null) this.signals[name] = {};
       let actions = this.actions[name];
       let signals = this.signals[name];
-      this.addActions(data.actions, actions, signals);
+      this.addActions(data.actions, actions, signals, this.signals);
     }
     // Done. fair enough
   }
-  addActions(source, actions, signals) {
+  addActions(source, actions, signals, parent) {
+    if (signals['*'] == null) {
+      let parentSignal = parent['*'];
+      let binding;
+      let handler = source['*'];
+      if (handler != null && parentSignal != null) {
+        binding = {
+          pre: parentSignal.pre.dispatch.bind(parentSignal.pre),
+          post: handler(parentSignal.post.dispatch.bind(parentSignal.post)),
+          dispatch: handler(parentSignal.dispatch.bind(parentSignal))
+        };
+      }
+      signals['*'] = new ParentSignal(false, binding && binding.dispatch);
+      signals['*'].pre = new ParentSignal(true, binding && binding.pre);
+      signals['*'].post = new ParentSignal(true, binding && binding.post);
+    }
     for (let actionName in source) {
+      if (actionName === '*') continue;
       let action = source[actionName];
       if (typeof action === 'function') {
         // This is a 'thunk' action
@@ -56,11 +73,13 @@ export default class BaseEngine {
       } else if (action != null && action[Symbol.for('exec')] != null) {
         // If exec is available, run that instead
         actions[actionName] =
-          action[Symbol.for('exec')](actionName, this, actions, signals);
+          action[Symbol.for('exec')](actionName, this, actions, signals,
+          signals['*']);
       } else if (action != null) {
         if (actions[actionName] == null) actions[actionName] = {};
         if (signals[actionName] == null) signals[actionName] = {};
-        this.addActions(action, actions[actionName], signals[actionName]);
+        this.addActions(action, actions[actionName], signals[actionName],
+          signals);
       } else {
         throw new Error(name + '.' + actionName + ' action is invalid');
       }

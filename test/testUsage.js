@@ -41,7 +41,9 @@ engine.addComponent('velocity', {
     set: signal((entity, x, y) => {
       entity.velocity.x = x;
       entity.velocity.y = y;
-    }),
+    },
+    // Parent example
+    parent => (entity, x, y) => parent('set', entity, x, y)),
     add: (entity, x, y) => {
       engine.actions.velocity.set(entity,
         entity.velocity.x + x,
@@ -62,6 +64,14 @@ engine.addSystem('init', {
       console.log(entity);
       // Or...
       // entity.add('velocity', {x: 2, y: 3});
+    }
+  }
+});
+engine.addSystem('test', {
+  hooks: {
+    'entity.add.*:post': (entity, name, data) => {
+      console.log('Set:', name, data);
+      console.log(entity);
     }
   }
 });

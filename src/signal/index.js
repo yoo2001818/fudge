@@ -27,13 +27,13 @@ export default class Signal {
     this._sort();
     let currentArgs = args;
     for (let i = 0; i < this._listeners.length; ++i) {
+      if (this.chained && currentArgs == null) return currentArgs;
       let listener = this._listeners[i];
       currentArgs = listener.execute(this.chained ? args : currentArgs);
       if (listener.deleted) {
         this._listeners.splice(i, 1);
         --i;
       }
-      if (currentArgs == null) return currentArgs;
     }
     return currentArgs;
   }
