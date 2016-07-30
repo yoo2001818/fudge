@@ -15,7 +15,8 @@ export default class BaseEngine {
         actions: {
           update: signal(() => {}, func => delta => func('update', delta)),
           start: signal(() => {}, func => () => func('start')),
-          stop: signal(() => {}, func => () => func('stop'))
+          stop: signal(() => {}, func => () => func('stop')),
+          load: signal(() => {}, func => () => func('load'))
         }
       });
     }
@@ -133,6 +134,7 @@ export default class BaseEngine {
   loadState(state) {
     if (this.running) throw new Error('Cannot modify engine while running');
     this.state = state;
+    this.actions.external.load();
   }
   getState() {
     if (this.state && this.state.toJSON) return this.state.toJSON();

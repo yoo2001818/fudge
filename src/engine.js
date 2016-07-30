@@ -3,6 +3,8 @@ import ComponentStore from './componentStore';
 import ECSState from './ecsState';
 import signal from './util/signal';
 
+import FamilySystem from './system/family';
+
 export default class Engine extends BaseEngine {
   constructor(components, systems) {
     super();
@@ -30,6 +32,9 @@ export default class Engine extends BaseEngine {
       }
     });
     this.addComponents(components);
+    this.addSystems({
+      family: FamilySystem
+    });
     this.addSystems(systems);
   }
   addComponent(name, data) {
@@ -63,5 +68,6 @@ export default class Engine extends BaseEngine {
   loadState(state) {
     if (this.running) throw new Error('Cannot modify engine while running');
     this.state = ECSState.fromJSON(state);
+    this.actions.external.load();
   }
 }

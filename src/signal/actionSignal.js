@@ -21,7 +21,9 @@ export default class ActionSignal extends ParentSignal {
     // Handler phase
     let result = this._handler.apply(null, args);
     // Post phase
-    this.post.dispatch.apply(this.post, args);
+    let postArgs = [].concat(args);
+    postArgs.push(result);
+    this.post.dispatch.apply(this.post, postArgs);
     return result;
   }
 }
