@@ -15,6 +15,7 @@ export default class ActionSignal extends Signal {
   dispatch() {
     // Pre phase
     let args = this.pre.dispatch.apply(this.pre, arguments);
+    if (args == null) return;
     // Emit phase
     super.dispatch.apply(this, args);
     // Handler phase

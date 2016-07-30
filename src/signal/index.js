@@ -33,6 +33,7 @@ export default class Signal {
         this._listeners.splice(i, 1);
         --i;
       }
+      if (currentArgs == null) return currentArgs;
     }
     return currentArgs;
   }
