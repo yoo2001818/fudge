@@ -98,11 +98,11 @@ engine.loadState({
 // Attach the system objects and start the engine.
 engine.start();
 
-engine.signals.position.set.on((entity, x, y) => {
+engine.signals.position.set.post.on((entity, x, y) => {
   console.log(entity, x, y);
 });
 
-engine.actions.external.update(13);
+engine.update(13);
 console.log(engine.getState());
 
 engine.stop();

@@ -2,11 +2,7 @@
   "name": "fudge",
   "version": "0.1.0",
   "description": "Fast universal deterministic game engine",
-  "keywords": [
-    "scheme",
-    "lisp",
-    "interpreter"
-  ],
+  "keywords": [],
   "homepage": "https://github.com/yoo2001818/fudge",
   "bugs": "https://github.com/yoo2001818/fudge/issues",
   "main": "./lib/index.js",
