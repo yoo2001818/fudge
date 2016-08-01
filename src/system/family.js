@@ -88,7 +88,7 @@ export default class FamilySystem {
         delete this.entityComponents[entity.id];
         delete this.entityFamilies[entity.id];
       },
-      'entity.add.*': (entity, name) => {
+      'entity.add.*:post': (entity, name) => {
         let components = this.entityComponents[entity.id];
         if (components == null) {
           components = this.entityComponents[entity.id] = this.createBitSet();

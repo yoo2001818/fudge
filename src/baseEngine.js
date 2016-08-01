@@ -31,7 +31,12 @@ export default class BaseEngine {
   addSystems(systems) {
     if (systems == null) return;
     for (let key in systems) {
-      this.addSystem(key, systems[key]);
+      this.addSystem(key, systems[key], false);
+    }
+    // Attach the systems
+    for (let key in systems) {
+      let system = this.systems[key];
+      if (typeof system.attach === 'function') system.attach(this);
     }
   }
   addComponent(name, data) {
@@ -85,7 +90,7 @@ export default class BaseEngine {
       }
     }
   }
-  addSystem(name, data) {
+  addSystem(name, data, attach = true) {
     if (this.running) throw new Error('Cannot modify engine while running');
     if (data == null) return;
     // Systems are not supposed to conflict - try to catch them.
@@ -102,13 +107,13 @@ export default class BaseEngine {
     }
     // Attach the system object
     this.systems[name] = system;
-    if (typeof system.attach === 'function') system.attach(this);
     // If 'hook' object is available, attach them too
     if (system.hooks != null) {
       for (let key in system.hooks) {
         this.attachHook(key, system.hooks[key], this.signals);
       }
     }
+    if (attach && typeof system.attach === 'function') system.attach(this);
   }
   attachHook(name, listener, data) {
     let keywords = name.split(/[.:]/);
