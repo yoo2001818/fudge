@@ -74,7 +74,7 @@ export default class BaseEngine {
       let action = source[actionName];
       if (typeof action === 'function') {
         // This is a 'thunk' action
-        actions[actionName] = action;
+        actions[actionName] = action.bind(this);
       } else if (action != null && action[Symbol.for('exec')] != null) {
         // If exec is available, run that instead
         actions[actionName] =

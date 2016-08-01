@@ -11,7 +11,7 @@ export default function signal(handler, parentHandler) {
           dispatch: parentHandler(parent.dispatch.bind(parent))
         };
       }
-      let signal = new ActionSignal(handler, parentSignal);
+      let signal = new ActionSignal(handler.bind(engine), parentSignal);
       signals[name] = signal;
       return signal.dispatch.bind(signal);
     }
