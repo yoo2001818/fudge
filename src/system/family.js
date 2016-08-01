@@ -1,19 +1,24 @@
 import BitSet from 'beatset';
+import Signal from '../signal';
 
 export class Family {
   constructor(id, pattern) {
     this.id = id;
     this.pattern = pattern;
     this.entities = [];
+    this.onAdd = new Signal();
+    this.onRemove = new Signal();
   }
   match(entityPattern) {
     return entityPattern.contains(this.pattern);
   }
   add(entity) {
     this.entities.push(entity);
+    this.onAdd.dispatch(entity);
   }
   remove(entity) {
     this.entities.splice(this.entities.indexOf(entity), 1);
+    this.onRemove.dispatch(entity);
   }
   forEach() {
     this.entities.forEach.apply(this.entities, arguments);
