@@ -37,6 +37,12 @@ export default class BaseEngine {
     for (let key in systems) {
       let system = this.systems[key];
       if (typeof system.attach === 'function') system.attach(this);
+      // If 'hook' object is available, attach them too
+      if (system.hooks != null) {
+        for (let key in system.hooks) {
+          this.attachHook(key, system.hooks[key], this.signals);
+        }
+      }
     }
   }
   addComponent(name, data) {
@@ -107,13 +113,15 @@ export default class BaseEngine {
     }
     // Attach the system object
     this.systems[name] = system;
-    // If 'hook' object is available, attach them too
-    if (system.hooks != null) {
-      for (let key in system.hooks) {
-        this.attachHook(key, system.hooks[key], this.signals);
+    if (attach && typeof system.attach === 'function') system.attach(this);
+    if (attach) {
+      // If 'hook' object is available, attach them too
+      if (system.hooks != null) {
+        for (let key in system.hooks) {
+          this.attachHook(key, system.hooks[key], this.signals);
+        }
       }
     }
-    if (attach && typeof system.attach === 'function') system.attach(this);
   }
   attachHook(name, listener, data) {
     let keywords = name.split(/[.:]/);

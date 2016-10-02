@@ -29,7 +29,7 @@ export default class Signal {
     for (let i = 0; i < this._listeners.length; ++i) {
       if (this.chained && currentArgs == null) return currentArgs;
       let listener = this._listeners[i];
-      currentArgs = listener.execute(this.chained ? args : currentArgs);
+      currentArgs = listener.execute(this.chained ? currentArgs : args);
       if (listener.deleted) {
         this._listeners.splice(i, 1);
         --i;
