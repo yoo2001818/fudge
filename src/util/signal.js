@@ -10,6 +10,12 @@ export default function signal(handler, parentHandler) {
           post: parentHandler(parent.post.dispatch.bind(parent.post)),
           dispatch: parentHandler(parent.dispatch.bind(parent))
         };
+      } else {
+        parentSignal = {
+          pre: parent.pre.dispatch.bind(parent.pre),
+          post: parent.post.dispatch.bind(parent.post),
+          dispatch: parent.dispatch.bind(parent)
+        };
       }
       let signal = new ActionSignal(handler.bind(engine), parentSignal);
       signals[name] = signal;
