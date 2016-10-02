@@ -47,7 +47,8 @@ export default class FamilySystem {
           family.entities = [];
         });
         // Loop for every entities and families. Welcome to O(n^2)!
-        for (let entity of this.engine.state.entities.values()) {
+        this.engine.state.entities.forEach(entity => {
+          if (entity == null) return;
           let components = this.entityComponents[entity.id] =
             this.createBitSet();
           let families = this.entityFamilies[entity.id] = new BitSet();
@@ -63,7 +64,7 @@ export default class FamilySystem {
               family.add(entity);
             }
           });
-        }
+        });
       },
       'entity.create:post': (data, entity) => {
         // Actually, if the entity has any data, it would have been initialized
@@ -155,14 +156,15 @@ export default class FamilySystem {
       this.familyComponents[pos].push(family);
     });
     // Iterate the entities, and add them if it matches the criteria.
-    for (let entity of this.engine.state.entities.values()) {
+    this.engine.state.entities.forEach(entity => {
+      if (entity == null) return;
       let components = this.entityComponents[entity.id];
       let families = this.entityFamilies[entity.id];
       if (family.match(components)) {
         families.set(family.id);
         family.add(entity);
       }
-    }
+    });
     // All done! return the family object.
     return family;
   }

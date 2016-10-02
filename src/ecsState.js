@@ -1,6 +1,7 @@
 export default class ECSState {
   constructor() {
-    this.entities = new Map();
+    this.entities = [];
+    this.entityQueue = [];
     this.global = {
       entityId: 0
     };
@@ -9,17 +10,17 @@ export default class ECSState {
     // Build a 'compact' version
     let output = [];
     output.push(this.global);
-    for (let entity of this.entities.values()) {
-      output.push(entity);
-    }
+    output.push(this.entities.filter(v => v != null));
+    output.push(this.entityQueue);
     return output;
   }
   static fromJSON(obj) {
     let state = new ECSState();
     state.global = obj[0];
-    for (let i = 1; i < obj.length; ++i) {
-      state.entities.set(i, obj[i]);
-    }
+    obj[1].forEach(entity => {
+      state.entities[entity.id] = entity;
+    });
+    state.entityQueue = obj[2];
     return state;
   }
 }

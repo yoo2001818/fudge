@@ -14,9 +14,14 @@ export default class Engine extends BaseEngine {
     this.addComponent('entity', {
       actions: {
         create: signal(data => {
-          let id = this.state.global.entityId ++;
+          let id;
+          if (this.state.entityQueue.length > 0) {
+            id = this.state.entityQueue.shift();
+          } else {
+            id = this.state.global.entityId ++;
+          }
           let entity = { id };
-          this.state.entities.set(id, entity);
+          this.state.entities[id] = entity;
           for (let name in data) {
             this.actions.entity.add[name](entity, data[name]);
           }
@@ -27,7 +32,8 @@ export default class Engine extends BaseEngine {
             let removeHandler = this.actions.entity.remove[name];
             if (removeHandler) removeHandler(entity);
           }
-          this.state.entities.delete(entity.id);
+          this.state.entities[entity.id] = null;
+          this.state.entityQueue.push(entity.id);
         })
       }
     });
