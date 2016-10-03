@@ -27,9 +27,15 @@ export default class ActionSignal extends ParentSignal {
       result = this._handler.apply(null, newArgs);
     }
     // Post phase
-    let postArgs = [].concat(newArgs);
-    postArgs.push(result);
-    this.post._dispatch(postArgs);
+    if (!this.post.isEmpty()) {
+      let postArgs = args;
+      if (result != null) {
+        // NOTE Is it okay to mutate args? Probably... But I'm not sure.
+        // postArgs = [].concat(newArgs);
+        postArgs.push(result);
+      }
+      this.post._dispatch(postArgs);
+    }
     return result;
   }
 }

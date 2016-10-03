@@ -8,11 +8,16 @@ export default class ParentSignal extends Signal {
   _dispatch(args) {
     if (this.chained) {
       let newArgs = super._dispatch(args);
-      if (this._parent) return this._parent(newArgs);
+      if (this._parent && !this._parent.isEmpty()) return this._parent(newArgs);
       return newArgs;
     } else {
       super._dispatch(args);
-      if (this._parent) this._parent(args);
+      if (this._parent && !this._parent.isEmpty()) this._parent(args);
     }
+  }
+  isEmpty() {
+    if (!super.isEmpty()) return false;
+    if (this._parent != null) return this._parent.isEmpty();
+    return true;
   }
 }

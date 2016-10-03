@@ -71,6 +71,10 @@ export default class BaseEngine {
           post: handler(parentSignal.post._dispatch.bind(parentSignal.post)),
           dispatch: handler(parentSignal._dispatch.bind(parentSignal))
         };
+        binding.dispatch.isEmpty = parentSignal.isEmpty.bind(parentSignal);
+        binding.pre.isEmpty = parentSignal.pre.isEmpty.bind(parentSignal.pre);
+        binding.post.isEmpty = parentSignal.post.isEmpty
+          .bind(parentSignal.post);
       }
       signals['*'] = new ParentSignal(false, binding && binding.dispatch);
       signals['*'].pre = new ParentSignal(true, binding && binding.pre);

@@ -52,4 +52,7 @@ export default class Signal {
   emit(...args) {
     return this._dispatch(args);
   }
+  isEmpty() {
+    return this._listeners.length === 0;
+  }
 }

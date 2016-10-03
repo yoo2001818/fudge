@@ -6,6 +6,7 @@ export default function signal(handler, parentHandler, raw) {
       let parentSignal;
       if (parent && parentHandler) {
         parentSignal = {
+          isEmpty: parent.isEmpty.bind(parent),
           pre: parent.pre._dispatch.bind(parent.pre),
           post: parentHandler(parent.post._dispatch.bind(parent.post)),
           dispatch: parentHandler(parent._dispatch.bind(parent))
@@ -17,6 +18,9 @@ export default function signal(handler, parentHandler, raw) {
           dispatch: parent._dispatch.bind(parent)
         };
       }
+      parentSignal.dispatch.isEmpty = parent.isEmpty.bind(parent);
+      parentSignal.pre.isEmpty = parent.pre.isEmpty.bind(parent.pre);
+      parentSignal.post.isEmpty = parent.post.isEmpty.bind(parent.post);
       let signal = new ActionSignal(handler.bind(engine), parentSignal, raw);
       signals[name] = signal;
       let dispatch = signal.dispatch.bind(signal);
