@@ -5,14 +5,14 @@ export default class ParentSignal extends Signal {
     super(chained);
     this._parent = parent;
   }
-  dispatch() {
+  _dispatch(args) {
     if (this.chained) {
-      let args = super.dispatch.apply(this, arguments);
-      if (this._parent) return this._parent.apply(this._parent, args);
-      return args;
+      let newArgs = super._dispatch(args);
+      if (this._parent) return this._parent(newArgs);
+      return newArgs;
     } else {
-      super.dispatch.apply(this, arguments);
-      if (this._parent) this._parent.apply(this._parent, arguments);
+      super._dispatch(args);
+      if (this._parent) this._parent(args);
     }
   }
 }

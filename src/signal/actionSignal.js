@@ -5,25 +5,31 @@ import ParentSignal from './parentSignal';
  * @extends Signal
  */
 export default class ActionSignal extends ParentSignal {
-  constructor(handler, parent) {
+  constructor(handler, parent, raw) {
     super(false, parent && parent.dispatch);
     // Phase: pre -> emit -> handler -> post
     this._handler = handler;
+    this._raw = raw;
     this.pre = new ParentSignal(true, parent && parent.pre);
     this.post = new ParentSignal(false, parent && parent.post);
   }
-  dispatch() {
+  _dispatch(args) {
     // Pre phase
-    let args = this.pre.dispatch.apply(this.pre, arguments);
-    if (args == null) return;
+    let newArgs = this.pre._dispatch(args);
+    if (newArgs == null) return;
     // Emit phase
-    super.dispatch.apply(this, args);
+    super._dispatch(newArgs);
     // Handler phase
-    let result = this._handler.apply(null, args);
+    let result;
+    if (this._raw) {
+      result = this._handler(newArgs);
+    } else {
+      result = this._handler.apply(null, newArgs);
+    }
     // Post phase
-    let postArgs = [].concat(args);
+    let postArgs = [].concat(newArgs);
     postArgs.push(result);
-    this.post.dispatch.apply(this.post, postArgs);
+    this.post._dispatch(postArgs);
     return result;
   }
 }

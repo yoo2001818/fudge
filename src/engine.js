@@ -1,7 +1,7 @@
 import BaseEngine from './baseEngine';
 import ComponentStore from './componentStore';
 import ECSState from './ecsState';
-import signal from './util/signal';
+import signalRaw from './util/signalRaw';
 
 import FamilySystem from './system/family';
 
@@ -13,7 +13,7 @@ export default class Engine extends BaseEngine {
     // Create entity base
     this.addComponent('entity', {
       actions: {
-        create: signal(data => {
+        create: signalRaw(([data]) => {
           let id;
           if (this.state.entityQueue.length > 0) {
             id = this.state.entityQueue.shift();
@@ -27,7 +27,7 @@ export default class Engine extends BaseEngine {
           }
           return entity;
         }),
-        delete: signal(entity => {
+        delete: signalRaw(([entity]) => {
           for (let name in entity) {
             let removeHandler = this.actions.entity.remove[name];
             if (removeHandler) removeHandler(entity);
@@ -51,22 +51,22 @@ export default class Engine extends BaseEngine {
       // Set up entity actions
       this.addActions({
         add: {
-          [name]: signal((entity, data) => {
+          [name]: signalRaw(([entity, data]) => {
             let instance = this.components.getInstance(name);
             if (typeof instance === 'function') {
               entity[name] = new instance(data);
             } else {
               entity[name] = Object.assign({}, instance, data);
             }
-          }, handler => (entity, data) => handler(entity, name, data))
+          }, handler => ([entity, data]) => handler([entity, name, data]))
         },
         remove: {
-          [name]: signal(entity => {
+          [name]: signalRaw(([entity]) => {
             if (entity[name] === undefined) {
               throw new Error('Component ' + name + ' is not added');
             }
             delete entity[name];
-          }, handler => (entity) => handler(entity, name))
+          }, handler => ([entity]) => handler([entity, name]))
         }
       }, this.actions.entity, this.signals.entity, this.signals);
     }

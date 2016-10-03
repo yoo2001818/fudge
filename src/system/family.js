@@ -14,11 +14,11 @@ export class Family {
   }
   add(entity) {
     this.entities.push(entity);
-    this.onAdd.dispatch(entity);
+    this.onAdd._dispatch([entity]);
   }
   remove(entity) {
     this.entities.splice(this.entities.indexOf(entity), 1);
-    this.onRemove.dispatch(entity);
+    this.onRemove._dispatch([entity]);
   }
   forEach() {
     this.entities.forEach.apply(this.entities, arguments);
@@ -39,7 +39,7 @@ export default class FamilySystem {
     // An array containing all the bitset for entity's families.
     this.entityFamilies = [];
     this.hooks = {
-      'external.load': () => {
+      'external.load!': () => {
         // Clear all the entity cache
         this.entityComponents = [];
         this.entityFamilies = [];
@@ -66,7 +66,8 @@ export default class FamilySystem {
           });
         });
       },
-      'entity.create:post': (data, entity) => {
+      'entity.create:post!': (args) => {
+        let entity = args[1];
         // Actually, if the entity has any data, it would have been initialized
         // by entity.add.*. This is used to init entities without data.
         let components = this.entityComponents[entity.id];
@@ -75,7 +76,7 @@ export default class FamilySystem {
           this.entityFamilies[entity.id] = new BitSet();
         }
       },
-      'entity.delete': (entity) => {
+      'entity.delete!': ([entity]) => {
         let families = this.entityFamilies[entity.id];
         if (families == null) return;
         // Remove from all families
@@ -89,7 +90,7 @@ export default class FamilySystem {
         delete this.entityComponents[entity.id];
         delete this.entityFamilies[entity.id];
       },
-      'entity.add.*:post': (entity, name) => {
+      'entity.add.*:post!': ([entity, name]) => {
         let components = this.entityComponents[entity.id];
         if (components == null) {
           components = this.entityComponents[entity.id] = this.createBitSet();
@@ -103,7 +104,7 @@ export default class FamilySystem {
           this.update(entity, family);
         });
       },
-      'entity.remove.*': (entity, name) => {
+      'entity.remove.*!': ([entity, name]) => {
         let components = this.entityComponents[entity.id];
         if (components == null) {
           components = this.entityComponents[entity.id] = this.createBitSet();

@@ -1,4 +1,4 @@
-import signal from './util/signal';
+import signalRaw from './util/signalRaw';
 import ParentSignal from './signal/parentSignal';
 
 export default class BaseEngine {
@@ -13,10 +13,11 @@ export default class BaseEngine {
     if (builtIn) {
       this.addComponent('external', {
         actions: {
-          update: signal(() => {}, func => delta => func('update', delta)),
-          start: signal(() => {}, func => () => func('start')),
-          stop: signal(() => {}, func => () => func('stop')),
-          load: signal(() => {}, func => () => func('load'))
+          update: signalRaw(() => {}, func => args =>
+            func(['update'].concat(args))),
+          start: signalRaw(() => {}, func => () => func(['start'])),
+          stop: signalRaw(() => {}, func => () => func(['stop'])),
+          load: signalRaw(() => {}, func => () => func(['load']))
         }
       });
     }
@@ -66,9 +67,9 @@ export default class BaseEngine {
       let handler = source['*'];
       if (handler != null && parentSignal != null) {
         binding = {
-          pre: parentSignal.pre.dispatch.bind(parentSignal.pre),
-          post: handler(parentSignal.post.dispatch.bind(parentSignal.post)),
-          dispatch: handler(parentSignal.dispatch.bind(parentSignal))
+          pre: parentSignal.pre._dispatch.bind(parentSignal.pre),
+          post: handler(parentSignal.post._dispatch.bind(parentSignal.post)),
+          dispatch: handler(parentSignal._dispatch.bind(parentSignal))
         };
       }
       signals['*'] = new ParentSignal(false, binding && binding.dispatch);
@@ -123,7 +124,13 @@ export default class BaseEngine {
       }
     }
   }
-  attachHook(name, listener, data) {
+  attachHook(_name, listener, data) {
+    let name;
+
+    let raw = _name.charAt(_name.length - 1) === '!';
+    if (raw) name = _name.slice(0, -1);
+    else name = _name;
+
     let keywords = name.split(/[.:]/);
     let parent = data;
     let priority = 100;
@@ -142,7 +149,7 @@ export default class BaseEngine {
         throw new Error('Signal ' + name + ' not found');
       }
     });
-    parent.add(listener, priority);
+    parent.add(listener, priority, raw);
   }
   loadState(state) {
     if (this.running) throw new Error('Cannot modify engine while running');

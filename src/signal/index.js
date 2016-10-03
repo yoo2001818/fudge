@@ -9,8 +9,8 @@ export default class Signal {
     this._dirty = false;
     this.chained = chained;
   }
-  add(listener, priority = 100, once = false) {
-    this._listeners.push(new Slot(listener, priority, once));
+  add(listener, priority = 100, raw = false, once = false) {
+    this._listeners.push(new Slot(listener, priority, raw, once));
     this._dirty = true;
   }
   remove(listener) {
@@ -23,7 +23,7 @@ export default class Signal {
     this._listeners.sort((a, b) => a.priority - b.priority);
     this._dirty = false;
   }
-  dispatch(...args) {
+  _dispatch(args) {
     this._sort();
     let currentArgs = args;
     for (let i = 0; i < this._listeners.length; ++i) {
@@ -37,14 +37,19 @@ export default class Signal {
     }
     return currentArgs;
   }
-
-  on(listener, priority) {
-    this.add(listener, priority);
+  dispatch(...args) {
+    return this._dispatch(args);
   }
-  once(listener, priority) {
-    this.once(listener, priority, true);
+  addRaw(listener, priority) {
+    this.add(listener, priority, true);
   }
-  emit() {
-    this.dispatch.apply(this, arguments);
+  on(listener, priority, raw) {
+    this.add(listener, priority, raw);
+  }
+  once(listener, priority, raw) {
+    this.once(listener, priority, raw, true);
+  }
+  emit(...args) {
+    return this._dispatch(args);
   }
 }
