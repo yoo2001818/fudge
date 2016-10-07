@@ -41,7 +41,7 @@ export default class BaseEngine {
       // If 'hook' object is available, attach them too
       if (system.hooks != null) {
         for (let key in system.hooks) {
-          this.attachHook(key, system.hooks[key], this.signals);
+          this.attachHook(key, system.hooks[key]);
         }
       }
     }
@@ -58,11 +58,15 @@ export default class BaseEngine {
       let signals = this.signals[name];
       this.addActions(data.actions, actions, signals, this.signals);
     }
+    if (data.globalActions != null) {
+      this.addActions(data.globalActions, this.actions, this.signals,
+        null, false);
+    }
     // Done. fair enough
   }
-  addActions(source, actions, signals, parent) {
-    if (signals['*'] == null) {
-      let parentSignal = parent['*'];
+  addActions(source, actions, signals, parent, createGlob = true) {
+    if (signals['*'] == null && createGlob) {
+      let parentSignal = parent != null && parent['*'];
       let binding;
       let handler = source['*'];
       if (handler != null && parentSignal != null) {
@@ -123,12 +127,12 @@ export default class BaseEngine {
       // If 'hook' object is available, attach them too
       if (system.hooks != null) {
         for (let key in system.hooks) {
-          this.attachHook(key, system.hooks[key], this.signals);
+          this.attachHook(key, system.hooks[key]);
         }
       }
     }
   }
-  attachHook(_name, listener, data) {
+  attachHook(_name, listener, forceRaw = false) {
     let name;
 
     let raw = _name.charAt(_name.length - 1) === '!';
@@ -136,7 +140,7 @@ export default class BaseEngine {
     else name = _name;
 
     let keywords = name.split(/[.:]/);
-    let parent = data;
+    let parent = this.signals;
     let priority = 100;
     keywords.forEach(keyword => {
       if (keyword.indexOf('@') !== -1) {
@@ -153,7 +157,29 @@ export default class BaseEngine {
         throw new Error('Signal ' + name + ' not found');
       }
     });
-    parent.add(listener, priority, raw);
+    parent.add(listener, priority, raw || forceRaw);
+  }
+  detachHook(_name, listener) {
+    let name;
+
+    let raw = _name.charAt(_name.length - 1) === '!';
+    if (raw) name = _name.slice(0, -1);
+    else name = _name;
+
+    let keywords = name.split(/[.:]/);
+    let parent = this.signals;
+    keywords.forEach(keyword => {
+      if (keyword.indexOf('@') !== -1) {
+        let index = keyword.indexOf('@');
+        parent = parent[keyword.slice(0, index)];
+      } else {
+        parent = parent[keyword];
+      }
+      if (parent == null) {
+        throw new Error('Signal ' + name + ' not found');
+      }
+    });
+    parent.remove(listener);
   }
   loadState(state) {
     if (this.running) throw new Error('Cannot modify engine while running');
