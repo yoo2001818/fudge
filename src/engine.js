@@ -55,8 +55,10 @@ export default class Engine extends BaseEngine {
             let instance = this.components.getInstance(name);
             if (typeof instance === 'function') {
               entity[name] = new instance(data);
-            } else {
+            } else if (typeof instance === 'object') {
               entity[name] = Object.assign({}, instance, data);
+            } else {
+              entity[name] = data != null ? data : instance;
             }
           }, handler => ([entity, data]) => handler([entity, name, data]))
         },
