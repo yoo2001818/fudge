@@ -14,7 +14,7 @@ export default class Signal {
     this._dirty = true;
   }
   remove(listener) {
-    let index = this._listeners.find(obj => obj.listener === listener);
+    let index = this._listeners.findIndex(obj => obj.listener === listener);
     if (index === -1) return;
     this._listeners.splice(index, 1);
   }
