@@ -13,7 +13,7 @@ export default class Engine extends BaseEngine {
     // Create entity base
     this.addComponent('entity', {
       actions: {
-        create: signalRaw(([data]) => {
+        create: signalRaw(([data, ignoreMissing = false]) => {
           let id;
           if (this.state.entityQueue.length > 0) {
             id = this.state.entityQueue.shift();
@@ -23,7 +23,13 @@ export default class Engine extends BaseEngine {
           let entity = { id };
           this.state.entities[id] = entity;
           for (let name in data) {
-            this.actions.entity.add[name](entity, data[name]);
+            let addHandler = this.actions.entity.add[name];
+            if (addHandler) {
+              addHandler(entity, data[name]);
+            } else if (!ignoreMissing) {
+              throw new Error('Component ' + name + ' is missing, but was ' +
+                'provided in creation data.');
+            }
           }
           return entity;
         }),
