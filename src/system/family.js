@@ -67,7 +67,7 @@ export default class FamilySystem {
         });
       },
       'entity.create:post!': (args) => {
-        let entity = args[1];
+        let entity = args[args.length - 1];
         // Actually, if the entity has any data, it would have been initialized
         // by entity.add.*. This is used to init entities without data.
         let components = this.entityComponents[entity.id];
@@ -75,6 +75,7 @@ export default class FamilySystem {
           this.entityComponents[entity.id] = this.createBitSet();
           this.entityFamilies[entity.id] = new BitSet();
         }
+        return args;
       },
       'entity.delete!': ([entity]) => {
         let families = this.entityFamilies[entity.id];
@@ -90,7 +91,9 @@ export default class FamilySystem {
         delete this.entityComponents[entity.id];
         delete this.entityFamilies[entity.id];
       },
-      'entity.add.*:post!': ([entity, name]) => {
+      'entity.add.*:post!': (args) => {
+        let entity = args[0];
+        let name = args[1];
         let components = this.entityComponents[entity.id];
         if (components == null) {
           components = this.entityComponents[entity.id] = this.createBitSet();
@@ -103,12 +106,11 @@ export default class FamilySystem {
         this.familyComponents[pos].forEach(family => {
           this.update(entity, family);
         });
+        return args;
       },
       'entity.remove.*!': ([entity, name]) => {
         let components = this.entityComponents[entity.id];
-        if (components == null) {
-          components = this.entityComponents[entity.id] = this.createBitSet();
-        }
+        if (components == null) return;
         let pos = this.getPos(name);
         if (!components.get(pos)) return;
         components.clear(pos);
