@@ -1,2 +1,2 @@
 # fudge
-Fast universal deterministic game engine
+ECS framework for JavaScript

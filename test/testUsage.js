@@ -4,6 +4,7 @@ import signal from '../src/util/signal';
 let engine = new Engine({
   position: {
     component: {x: 0, y: 0},
+    toJSON: comp => Object.assign({}, comp, {yay: true}),
     actions: {
       set: signal((entity, x, y) => {
         entity.position.x = x;

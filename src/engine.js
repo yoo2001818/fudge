@@ -9,7 +9,7 @@ export default class Engine extends BaseEngine {
   constructor(components, systems) {
     super();
     this.components = new ComponentStore();
-    this.state = new ECSState();
+    this.state = new ECSState(this);
     // Create entity base
     this.addComponent('entity', {
       actions: {
@@ -53,7 +53,10 @@ export default class Engine extends BaseEngine {
     super.addComponent(name, data);
     // Set up components (in ECS)
     if (data.component) {
-      this.components.add(name, data.component);
+      let entry = this.components.add(name, data.component);
+      if (data.toJSON) {
+        entry.toJSON = data.toJSON;
+      }
       // Set up entity actions
       this.addActions({
         add: {

@@ -14,15 +14,17 @@ export default class ComponentStore {
     this.store[name] = entry;
     this.entryList.push(entry);
     this.list.push(name);
+    return entry;
+  }
+  getEntry(name) {
+    let entry = this.store[name];
+    if (entry == null) throw new Error('Component ' + name + ' is not defined');
+    return entry;
   }
   getId(name) {
-    let entry = this.store[name];
-    if (entry == null) throw new Error('Component ' + name + ' is not defined');
-    return entry.id;
+    return this.getEntry(name).id;
   }
   getInstance(name) {
-    let entry = this.store[name];
-    if (entry == null) throw new Error('Component ' + name + ' is not defined');
-    return entry.instance;
+    return this.getEntry(name).instance;
   }
 }
