@@ -81,6 +81,10 @@ export default class Engine extends BaseEngine {
         }
       }, this.actions.entity, this.signals.entity, this.signals);
     }
+    // Global initial state
+    if (data.global) {
+      Object.assign(this.state.global, data.global);
+    }
   }
   loadState(state) {
     if (this.running) throw new Error('Cannot modify engine while running');
