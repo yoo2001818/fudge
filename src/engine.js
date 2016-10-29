@@ -54,6 +54,7 @@ export default class Engine extends BaseEngine {
     // Set up components (in ECS)
     if (data.component) {
       let entry = this.components.add(name, data.component);
+      entry.data = data;
       if (data.toJSON) {
         entry.toJSON = data.toJSON;
       }
