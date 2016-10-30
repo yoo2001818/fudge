@@ -46,25 +46,6 @@ export default class FamilySystem {
         this.families.forEach(family => {
           family.entities = [];
         });
-        // Loop for every entities and families. Welcome to O(n^2)!
-        this.engine.state.entities.forEach(entity => {
-          if (entity == null) return;
-          let components = this.entityComponents[entity.id] =
-            this.createBitSet();
-          let families = this.entityFamilies[entity.id] = new BitSet();
-          // Build components bitset...
-          for (let key in entity) {
-            if (key === 'id') continue;
-            components.set(this.getPos(key));
-          }
-          // Build families.
-          this.families.forEach(family => {
-            if (family.match(components)) {
-              families.set(family.id);
-              family.add(entity);
-            }
-          });
-        });
       },
       'entity.create:post!': (args) => {
         let entity = args[args.length - 1];

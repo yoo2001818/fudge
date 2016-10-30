@@ -28,31 +28,4 @@ export default class ECSState {
     output.push(this.entityQueue);
     return output;
   }
-  static fromJSON(obj, engine) {
-    let state = new ECSState();
-    state.global = obj[0];
-    obj[1].forEach(entity => {
-      let entityObj = {};
-      for (let name in entity) {
-        let addHandler = engine.actions.entity.add[name];
-        if (addHandler) {
-          let instance = engine.components.getInstance(name);
-          let data = entity[name];
-          // Why is it here
-          if (typeof instance === 'function') {
-            entityObj[name] = new instance(data);
-          } else if (typeof instance === 'object') {
-            entityObj[name] = Object.assign({}, instance, data);
-          } else {
-            entityObj[name] = data != null ? data : instance;
-          }
-        } else {
-          entityObj[name] = entity;
-        }
-      }
-      state.entities[entity.id] = entityObj;
-    });
-    state.entityQueue = obj[2];
-    return state;
-  }
 }

@@ -15,7 +15,9 @@ export default class Engine extends BaseEngine {
       actions: {
         create: signalRaw(([data, ignoreMissing = false]) => {
           let id;
-          if (this.state.entityQueue.length > 0) {
+          if (data.id != null) {
+            id = data.id;
+          } else if (this.state.entityQueue.length > 0) {
             id = this.state.entityQueue.shift();
           } else {
             id = this.state.global.entityId ++;
@@ -23,6 +25,7 @@ export default class Engine extends BaseEngine {
           let entity = { id };
           this.state.entities[id] = entity;
           for (let name in data) {
+            if (name === 'id') continue;
             let addHandler = this.actions.entity.add[name];
             if (addHandler) {
               addHandler(entity, data[name]);
@@ -87,8 +90,14 @@ export default class Engine extends BaseEngine {
       Object.assign(this.state.global, data.global);
     }
   }
-  loadState(state) {
+  loadState(data) {
     if (this.running) throw new Error('Cannot modify engine while running');
-    this.state = ECSState.fromJSON(state, this);
+    this.state = new ECSState(this);
+    this.state.global = data[0];
+    this.state.entityQueue = data[2];
+    data[1].forEach(entity => {
+      this.actions.entity.create(entity);
+      // state.entities[entity.id] = entityObj;
+    });
   }
 }

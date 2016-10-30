@@ -15,8 +15,12 @@ export default class BaseEngine {
         actions: {
           update: signalRaw(() => {}, func => args =>
             func(['update'].concat(args))),
-          start: signalRaw(() => {}, func => () => func(['start'])),
-          stop: signalRaw(() => {}, func => () => func(['stop'])),
+          start: signalRaw(() => {
+            this.running = true;
+          }, func => () => func(['start'])),
+          stop: signalRaw(() => {
+            this.running = false;
+          }, func => () => func(['stop'])),
           load: signalRaw(([state]) => {
             this.loadState(state);
           }, func => () => func(['load']))
@@ -193,11 +197,9 @@ export default class BaseEngine {
   }
   start() {
     this.actions.external.start();
-    this.running = true;
   }
   stop() {
     this.actions.external.stop();
-    this.running = false;
   }
   update(delta) {
     this.actions.external.update(delta);
