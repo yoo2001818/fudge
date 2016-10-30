@@ -17,7 +17,9 @@ export default class BaseEngine {
             func(['update'].concat(args))),
           start: signalRaw(() => {}, func => () => func(['start'])),
           stop: signalRaw(() => {}, func => () => func(['stop'])),
-          load: signalRaw(() => {}, func => () => func(['load']))
+          load: signalRaw(([state]) => {
+            this.loadState(state);
+          }, func => () => func(['load']))
         }
       });
     }
@@ -184,7 +186,6 @@ export default class BaseEngine {
   loadState(state) {
     if (this.running) throw new Error('Cannot modify engine while running');
     this.state = state;
-    this.actions.external.load();
   }
   getState() {
     if (this.state && this.state.toJSON) return this.state.toJSON();

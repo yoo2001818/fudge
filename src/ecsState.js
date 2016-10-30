@@ -28,15 +28,15 @@ export default class ECSState {
     output.push(this.entityQueue);
     return output;
   }
-  static fromJSON(obj) {
+  static fromJSON(obj, engine) {
     let state = new ECSState();
     state.global = obj[0];
     obj[1].forEach(entity => {
       let entityObj = {};
       for (let name in entity) {
-        let addHandler = this.actions.entity.add[name];
+        let addHandler = engine.actions.entity.add[name];
         if (addHandler) {
-          let instance = this.engine.components.getInstance(name);
+          let instance = engine.components.getInstance(name);
           let data = entity[name];
           // Why is it here
           if (typeof instance === 'function') {

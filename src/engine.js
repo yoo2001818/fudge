@@ -89,7 +89,6 @@ export default class Engine extends BaseEngine {
   }
   loadState(state) {
     if (this.running) throw new Error('Cannot modify engine while running');
-    this.state = ECSState.fromJSON(state);
-    this.actions.external.load();
+    this.state = ECSState.fromJSON(state, this);
   }
 }
