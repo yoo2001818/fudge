@@ -39,7 +39,7 @@ export default class Engine extends BaseEngine {
         delete: signalRaw(([entity]) => {
           for (let name in entity) {
             let removeHandler = this.actions.entity.remove[name];
-            if (removeHandler) removeHandler(entity);
+            if (removeHandler) removeHandler(entity, true);
           }
           this.state.entities[entity.id] = null;
           this.state.entityQueue.push(entity.id);
@@ -76,12 +76,14 @@ export default class Engine extends BaseEngine {
           }, handler => ([entity, data]) => handler([entity, name, data]))
         },
         remove: {
-          [name]: signalRaw(([entity]) => {
+          [name]: signalRaw(([entity, deleting]) => {
             if (entity[name] === undefined) {
               throw new Error('Component ' + name + ' is not added');
             }
-            delete entity[name];
-          }, handler => ([entity]) => handler([entity, name]))
+            if (!deleting) delete entity[name];
+          }, handler => ([entity, deleting]) =>
+            handler([entity, name, deleting])
+          )
         }
       }, this.actions.entity, this.signals.entity, this.signals);
     }
