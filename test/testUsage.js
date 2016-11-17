@@ -23,7 +23,6 @@ let engine = new Engine({
       'external.update': (delta) => {
         engine.systems.family.get('position').forEach(entity => {
           engine.actions.position.add(entity, delta, 0);
-          // with sugar: entity.position.add(delta, 0);
         });
       },
       // One can use hooks to redirect signals
@@ -39,12 +38,14 @@ let engine = new Engine({
 engine.addComponent('velocity', {
   component: {x: 0, y: 0},
   actions: {
-    set: signal((entity, x, y) => {
-      entity.velocity.x = x;
-      entity.velocity.y = y;
-    },
-    // Parent example
-    parent => (entity, x, y) => parent('set', entity, x, y)),
+    set: signal(
+      (entity, x, y) => {
+        entity.velocity.x = x;
+        entity.velocity.y = y;
+      },
+      // Parent example
+      parent => ([entity, x, y]) => parent(['set', entity, x, y])
+    ),
     add: (entity, x, y) => {
       engine.actions.velocity.set(entity,
         entity.velocity.x + x,
