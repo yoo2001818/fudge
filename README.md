@@ -21,6 +21,17 @@ It has following phases:
 
 It also has parents, so signals can go up to the hierarchy.
 
+## Methods
+
+- add(listener, priority, raw, once) - Adds new listener.
+- remove(listener) - Removes the listener.
+- dispatch(...args) - Dispatch the signal.
+- `_dispach(args)` - Dispatch the signal (Accepts an array as argument)
+- emit(...args) - Dispatch the signal.
+- addRaw(listener, priority) - Same as `add(listener, priority, true)`
+- on(listener, priority, raw) - Same as `add`
+- once(listener, priority, raw) - Same as `add(listener, priority, raw, true)`
+
 # Action
 An action is a function that performs certain task, like moving an entity to
 specified position, etc. It may wrap a signal, or it might be a bare function.
@@ -79,6 +90,10 @@ import { signal, signalRaw } from 'fudge';
     set2: signal((entity, data) => {
       entity.pos = data;
     }),
+    // 'this' is the engine object, so we can do this:
+    set3: signal(function (entity, data) {
+      this.actions.position.set2(entity, data);
+    }),
     // signal/signalRaw also control parent's arguments.
     // NOTE It uses an array for args
     set3: signal((entity, data) => {
@@ -90,6 +105,12 @@ import { signal, signalRaw } from 'fudge';
         entity.pos.x = x;
       })
     },
+    // If bare function is specified, it'll be registered as an action, but
+    // not a signal.
+    // Also, 'this' is the engine object.
+    move: function (entity, data) {
+      this.actions.position.set2(entity, data);
+    }
     // * is used to raise the signal flow to parent, it won't go upper level
     // if * is not specified.
     // 'position.*' would be still usable, but '*' won't receive 'position.*'.
@@ -98,3 +119,129 @@ import { signal, signalRaw } from 'fudge';
   }
 }
 ```
+
+# State
+The engine state.
+
+- global: Object. The global state.
+- entities: Array. The array containing all the entities.
+
+# Entity
+An entity contains all the components associated with it.
+
+- id: Number. The entity ID.
+- <Component name>: Object. The component.
+
+# Engine
+Engine stores / controls all the actions, signals, systems, entities used in
+the application.
+
+```js
+import { Engine } from 'fudge';
+```
+
+## constructor
+`new Engine(components, systems)`
+
+Creates new engine. Components and systems are objects.
+
+```js
+import { Engine, signalRaw } from 'fudge';
+let engine = new Engine({
+  position: {
+    component: {
+      x: 0, y: 0
+    },
+    actions: {
+      set: signalRaw(([entity, x, y]) => {
+        entity.position = { x, y };
+      }),
+      add: function (entity, x, y) {
+        this.actions.position.set(entity,
+          entity.position.x + x,
+          entity.position.y + y
+        );
+      }
+    }
+  }
+}, {
+  move: function (engine) {
+    this.family = engine.systems.family.get('position');
+    this.hooks = {
+      'external.update!': ([delta]) => {
+        this.family.forEach(entity => {
+          this.engine.actions.position.add(entity, delta, delta);
+        })
+      }
+    };
+  }
+});
+```
+
+## Properties
+
+- running: Boolean.
+- actions: Object. An object containing all the actions.
+- signals: Object. An object containing all the signals.
+- systems: Object. An object containing all the systems.
+- components: ComponentStore.
+- state: State. The engine state.
+
+## Methods
+
+### addComponents(components)
+Registers components to the engine. Engine must be not running.
+
+### addSystems(systems)
+Registers systems to the engine. Engine must be not running.
+
+### addComponent(name, component)
+Registers component to the engine. Engine must be not running.
+
+### addSystem(name, system)
+Registers system to the engine. Engine must be not running.
+
+### getState()
+Returns JSON state.
+
+### start()
+Starts the engine. (Make it running). Also dispatches `external.start`.
+
+### stop()
+Stops the engine. (Stop running). Also dispatches `external.stop`.
+
+### update(delta)
+Update the engine. Equals to dispatching `external.update(delta)`.
+
+# Built-in Actions
+## external
+- load(state) - Loads the state to JSON.
+- start() - Start the engine.
+- stop() - Stop the engine.
+- update(delta) - Update the engine.
+
+## entity
+- create(data, ignoreMissing) - Creates an entity with the schema.
+- delete(entity) - Deletes the entity.
+- add.<Component name>(entity, data) - Add a component to the entity.
+- remove.<Component name>(entity) - Removes the component from the entity.
+
+# Built-in Systems
+## family
+FamilySystem manages lists of entities with specified components efficiently.
+It internally stores BitSets of entities and families, and updates the list
+when an action has occurred.
+
+- get(component1, component2, ...): Family - Returns new (or existing) Family
+  object.
+
+Family object has following properties:
+
+- onAdd: Signal. Issued when an entity is added.
+- onRemove: Signal. Issued when an entity is removed.
+- entities: Array. An array containing the entities.
+- forEach: Function. A delegate function for `entities.forEach`.
+
+# Integrations
+- [react-fudge](https://github.com/yoo2001818/react-fudge) -
+  React binding for fudge
